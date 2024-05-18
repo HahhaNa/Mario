@@ -10,14 +10,23 @@
   "packable": true,
   "width": 735,
   "height": 339,
-  "platformSettings": {},
+  "platformSettings": {
+    "default": {
+      "formats": [
+        {
+          "name": "png",
+          "quality": 88.8
+        }
+      ]
+    }
+  },
   "subMetas": {
     "skyBackground": {
       "ver": "1.0.6",
       "uuid": "cf30a2d7-8361-4387-b768-e433eb17a5e4",
       "importer": "sprite-frame",
       "rawTextureUuid": "f1a4ae52-8b9d-42e1-bc79-e865c10ffcbf",
-      "trimType": "auto",
+      "trimType": "custom",
       "trimThreshold": 1,
       "rotated": false,
       "offsetX": 0,

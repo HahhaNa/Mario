@@ -1,7 +1,7 @@
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export class PlayerController extends cc.Component {
+export class Player extends cc.Component {
     @property()
     playerSpeed: number = 300;
 
@@ -143,14 +143,18 @@ export class PlayerController extends cc.Component {
     }
 
     onBeginContact(contact, selfCollider, otherCollider) {
+        // console.log("OUT Player Begin Contact");
         if (otherCollider.tag === 1) {
+            // console.log("Player Begin Contact");
             this.isOnGround = true;
             this.jumpAnimTriggered = false;
         }
     }
 
     onEndContact(contact, selfCollider, otherCollider) {
+        // console.log("OUT Player End Contact");
         if (otherCollider.tag === 1) {
+            // console.log("Player End Contact");
             this.isOnGround = false; 
         }
     }
