@@ -1,29 +1,38 @@
 const {ccclass, property} = cc._decorator;
+import {GameMgr} from "./GameMgr";
 
 @ccclass
 export class Player extends cc.Component {
     @property()
     playerSpeed: number = 300;
 
-    @property()
-    playerStandSpeed: number = 50;
+    @property({ type: cc.AudioClip })
+    jumpSound: cc.AudioClip = null;
 
     private moveDir = 0;
     private leftDown: boolean = false;
     private rightDown: boolean = false;
-    private jumping: boolean = false;
     private physicManager: cc.PhysicsManager = null;
     private fallDown: boolean = false;
-    private isOnGround: boolean = false;  // Declare the isOnGround property
+    private isOnGround: boolean = false;  
     private idleFrame: cc.SpriteFrame = null;
     private anim: cc.Animation = null;
     private jumpAnimTriggered: boolean = false;
+    private lifeLostCooldown: boolean = false;
+
+    public setLifeLostCooldown() {
+        console.log("Set Cool Down");
+        this.lifeLostCooldown = true;
+        // Reset cooldown after 1 second (or appropriate time)
+        setTimeout(() => {
+            this.lifeLostCooldown = false;
+        }, 1000);
+    }
 
     onLoad() {
-
         this.physicManager = cc.director.getPhysicsManager();
         this.physicManager.enabled = true;
-        this.physicManager.gravity = cc.v2 (0, -200);
+        this.physicManager.gravity = cc.v2(0, -200);
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
@@ -50,20 +59,25 @@ export class Player extends cc.Component {
     update(dt) {
         if (this.moveDir !== 0) {
             this.node.x += this.playerSpeed * this.moveDir * dt;
-        }      
-        
+        }
+        if (this.node.position.y < -350) {
+            const gameMgr = this.node.getComponent(GameMgr);
+            if (gameMgr) {
+                gameMgr.updateLife(-1);
+            }
+        }
+
         const baseScale = 3;
-        this.node.scaleX = (this.moveDir == 0) ? this.node.scaleX  : baseScale * ((this.moveDir > 0) ? 1 : -1);
+        this.node.scaleX = (this.moveDir == 0) ? this.node.scaleX : baseScale * ((this.moveDir > 0) ? 1 : -1);
 
         if (!this.isOnGround && !this.fallDown && this.moveDir != 0) {
             this.fallDown = true;
         }
-        if(!this.jumpAnimTriggered) this.playerAnimation();
+        if (!this.jumpAnimTriggered) this.playerAnimation();
     }
 
     onKeyDown(event) {
-        switch(event.keyCode)
-        {
+        switch (event.keyCode) {
             case cc.macro.KEY.left:
                 this.leftDown = true;
                 this.playerMove(-1);
@@ -72,25 +86,20 @@ export class Player extends cc.Component {
                 this.rightDown = true;
                 this.playerMove(1);
                 break;
-            case cc.macro.KEY.a:
-                this.reborn(cc.v3(-445, -275, 0));
-                break;
             case cc.macro.KEY.space:
-                this.playerJump(800);
-                console.log("IsPlaying? ", this.anim.getAnimationState("jump").isPlaying);
-                if (!this.jumpAnimTriggered && this.isOnGround) {
+                if ((!this.jumpAnimTriggered)) {
                     this.anim.play("jump");
-                    console.log("Play Jump");
+                    this.playerJump(800);
                     this.jumpAnimTriggered = true; // Set the flag true after playing the animation
-                } 
+                } else {
+                    console.log("jumpAnimTriggered: ", this.jumpAnimTriggered, ", isPlaying: ", this.anim.getAnimationState("jump").isPlaying, ", onGround: ", this.isOnGround);
+                }
                 break;
         }
     }
 
     onKeyUp(event) {
-        // console.log("Is onGround: ", this.isOnGround, ", Is fallDown: ", this.fallDown, ", MoveDir: ", this.moveDir);
-        switch(event.keyCode)
-        {
+        switch (event.keyCode) {
             case cc.macro.KEY.left:
                 this.leftDown = false;
                 this.updateDirection();
@@ -102,7 +111,7 @@ export class Player extends cc.Component {
         }
     }
 
-    public playerMove(moveDir: number){
+    public playerMove(moveDir: number) {
         this.moveDir = moveDir;
     }
 
@@ -116,20 +125,14 @@ export class Player extends cc.Component {
             }
         }
     }
-    
-
-
 
     public playerJump(velocity: number) {
-        if (this.isOnGround) {
+        if (!this.jumpAnimTriggered) {
             const rb = this.getComponent(cc.RigidBody);
             rb.linearVelocity = cc.v2(rb.linearVelocity.x, velocity);
+            // Play the jump sound effect
+            cc.audioEngine.playEffect(this.jumpSound, false);
         }
-    }
-
-    public reborn(rebornPos: cc.Vec3) {
-        this.node.position = rebornPos;
-        this.getComponent(cc.RigidBody).linearVelocity = cc.v2();
     }
 
     public updateDirection() {
@@ -142,21 +145,26 @@ export class Player extends cc.Component {
         }
     }
 
+    respawn() {
+        console.log("RESPAWN - start");
+        this.node.position = cc.v3(120, -260, 0);
+        console.log("RESPAWN - position set", this.node.position);
+        const rb = this.getComponent(cc.RigidBody);
+        rb.linearVelocity = cc.v2(0, 0); // Reset velocity
+        console.log("RESPAWN - velocity reset");
+    }
+
     onBeginContact(contact, selfCollider, otherCollider) {
-        // console.log("OUT Player Begin Contact");
         if (otherCollider.tag === 1) {
-            // console.log("Player Begin Contact");
             this.isOnGround = true;
             this.jumpAnimTriggered = false;
         }
     }
 
     onEndContact(contact, selfCollider, otherCollider) {
-        // console.log("OUT Player End Contact");
         if (otherCollider.tag === 1) {
-            // console.log("Player End Contact");
-            this.isOnGround = false; 
+            console.log("Player End Contact");
+            this.isOnGround = false;
         }
     }
-    
 }

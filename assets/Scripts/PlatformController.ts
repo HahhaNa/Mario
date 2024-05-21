@@ -1,41 +1,113 @@
-// Learn TypeScript:
-//  - https://docs.cocos.com/creator/manual/en/scripting/typescript.html
-// Learn Attribute:
-//  - https://docs.cocos.com/creator/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
-
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class PlatformController extends cc.Component {
-    @property(cc.Vec2)
-    moveDirection: cc.Vec2 = cc.v2(0, 0);
+export default class Platform extends cc.Component {
 
-    @property
-    moveSpeed: number = 0;
+    @property({ type: cc.AudioClip })
+    soundEffect: cc.AudioClip = null;
 
-    @property
-    isMoving: boolean = false;
+    protected isTouched: boolean = false;
+
+    private anim: cc.Animation = null;
+
+    private animState: cc.AnimationState = null;
+
+    private highestPos: number = 118;
+
+    private moveSpeed: number = 100;
+
+    private springVelocity: number = 320;
 
     start() {
-        if (this.isMoving) {
-            this.platformMove();
+        this.anim = this.getComponent(cc.Animation);
+
+        if (this.node.name == "Conveyor") {
+            this.node.scaleX = (Math.random() >= 0.5) ? 1 : -1;
+            this.moveSpeed *= this.node.scaleX;
         }
+    }
+
+    reset() {
+        this.isTouched = false;
     }
 
     update(dt) {
-        if (this.isMoving) {
-            this.node.x += this.moveDirection.x * this.moveSpeed * dt;
-            this.node.y += this.moveDirection.y * this.moveSpeed * dt;
-        }
+        if (this.node.y - this.highestPos >= 0 && this.node.y - this.highestPos < 100)
+            this.getComponent(cc.PhysicsBoxCollider).enabled = false;
+        else
+            this.getComponent(cc.PhysicsBoxCollider).enabled = true;
     }
 
-    public platformMove(){
-        // Define a moving pattern, e.g., moving back and forth
-        let moveOneWay = cc.moveBy(1, this.moveDirection.x * 100, this.moveDirection.y * 100);
-        let moveBack = cc.moveBy(1, -this.moveDirection.x * 100, -this.moveDirection.y * 100);
-        let sequence = cc.sequence(moveOneWay, moveBack);
-        this.node.runAction(cc.repeatForever(sequence));
+    playAnim() {
+        if (this.anim)
+            this.animState = this.anim.play();
     }
+
+    getAnimState() {
+        if (this.animState)
+            return this.animState;
+    }
+
+    platformDestroy()
+    {
+        cc.log(this.node.name + " Platform destory.");
+        this.node.destroy();
+    }
+
+  onBeginContact(contact, selfCollider, otherCollider) {
+    const player = otherCollider.getComponent('Player');
+    const normal = contact.getWorldManifold().normal;
+    if (normal.y > 0 && player) {
+        this.playSoundEffect();
+
+        switch (this.node.name) {
+            case 'Normal':
+                player.playerRecover();
+                break;
+            case 'Nails':
+                this.scheduleOnce(() => player.playerDamage(), 0);
+                break;
+            case 'Trampoline':
+                this.playAnim();
+                player.playerRecover();
+                player.getComponent(cc.RigidBody).linearVelocity = cc.v2(player.getComponent(cc.RigidBody).linearVelocity.x, this.springVelocity);
+                break;
+            case 'Conveyor':
+                
+                break;
+            case 'Fake':
+                this.getAnimState();
+                this.playAnim();
+                this.scheduleOnce(() => contact.disabled = true, 0.2);
+                break;
+            }
+    }
+    else {
+        contact.disabled = true;
+    }
+}
+
+onEndContact(contact, selfCollider, otherCollider) {
+
+}
+
+onPreSolve(contact, selfCollider, otherCollider) {
+    const player = otherCollider.getComponent('Player');
+    if (player && this.node.name === 'Conveyor') {
+        otherCollider.getComponent(cc.RigidBody).linearVelocity = cc.v2(this.moveSpeed, 0);
+    }
+}
+
+onPostSolve(contact, selfCollider, otherCollider) {
+    // You can handle logic after physics solve here if needed.
+}
+
+playSoundEffect() {
+    if (!this.isTouched) {
+        cc.audioEngine.playEffect(this.soundEffect, false);
+        this.isTouched = true;
+    }
+}
+
+
 }

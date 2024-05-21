@@ -2,7 +2,9 @@
   "start-scene": "0818f906-cc1d-4ac9-a691-1eae83ee2b37",
   "group-list": [
     "default",
-    "Grounds"
+    "Grounds",
+    "UI",
+    "BackGround"
   ],
   "collision-matrix": [
     [
@@ -10,7 +12,18 @@
     ],
     [
       false,
-      false
+      true
+    ],
+    [
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      false,
+      true
     ]
   ],
   "excluded-modules": [

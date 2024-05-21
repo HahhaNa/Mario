@@ -2,9 +2,11 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class CameraTransposer extends cc.Component {
-
     @property(cc.Node)
     followTarget: cc.Node = null;
+
+    @property(cc.Node)
+    excludeNode: cc.Node = null;  // Node to exclude from following, including its children
 
     @property(cc.Boolean)
     followX: boolean = true;
@@ -33,15 +35,8 @@ export default class CameraTransposer extends cc.Component {
     @property(cc.Float)
     lerpSpeed: number = 5;  // Adjust for smoother or faster following
 
-    // LIFE-CYCLE CALLBACKS:
-
-    // onLoad() {
-    //     // Ensure camera starts centered on Mario if necessary
-    //     this.node.position = new cc.Vec3(this.followTarget.position.x, this.followTarget.position.y, this.node.position.z);
-    // }
-
     update(dt) {
-        if (this.followTarget) {
+        if (this.followTarget && !this.isExcluded(this.followTarget)) {
             let targetPos = this.followTarget.position.add(new cc.Vec3(this.offsetX, this.offsetY, 0));
             let smoothedPosition = new cc.Vec3(
                 cc.misc.lerp(this.node.position.x, targetPos.x, dt * this.lerpSpeed),
@@ -54,6 +49,17 @@ export default class CameraTransposer extends cc.Component {
 
             this.node.position = new cc.Vec3(clampedX, clampedY, this.node.position.z);
         }
+    }
+
+    // Utility function to determine if a node is the excludeNode or one of its descendants
+    isExcluded(node: cc.Node): boolean {
+        if (node === this.excludeNode) return true;
+        let parent = node.parent;
+        while (parent) {
+            if (parent === this.excludeNode) return true;
+            parent = parent.parent;
+        }
+        return false;
     }
 }
 
