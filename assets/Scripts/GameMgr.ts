@@ -96,7 +96,7 @@ export class GameMgr extends cc.Component {
         this.lifeCnt.string = String(this.playerLife);
 
         if (this.playerLife > 0) {
-            this.playerNode.getComponent(Player).respawn();
+            // this.playerNode.getComponent(Player).respawn();
         } else {
             // Player has no more lives, game over
             this.gameOver();

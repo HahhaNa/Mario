@@ -71,10 +71,7 @@ export class Goomba extends cc.Component {
                 if (playerComponent && !playerComponent.lifeLostCooldown) {
                     const gameMgr = playerComponent.node.getComponent(GameMgr);
                     playerComponent.setLifeLostCooldown();
-                    if (gameMgr) {
-                        gameMgr.updateLife(-1);
-                    }
-                    // playerComponent.anim.play('fall');
+                    playerComponent.die(); 
                 }
             }
         } else if(otherCollider.tag == 1) {

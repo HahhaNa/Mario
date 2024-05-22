@@ -19,6 +19,9 @@ export class Player extends cc.Component {
     private anim: cc.Animation = null;
     private jumpAnimTriggered: boolean = false;
     private lifeLostCooldown: boolean = false;
+    private isDead: boolean = false;
+    private rigidBody: cc.RigidBody = null;
+    private collider: cc.PhysicsCollider = null;
 
     public setLifeLostCooldown() {
         console.log("Set Cool Down");
@@ -30,6 +33,7 @@ export class Player extends cc.Component {
     }
 
     onLoad() {
+        console.log("Player Onload");
         this.physicManager = cc.director.getPhysicsManager();
         this.physicManager.enabled = true;
         this.physicManager.gravity = cc.v2(0, -200);
@@ -58,13 +62,14 @@ export class Player extends cc.Component {
 
     update(dt) {
         if (this.moveDir !== 0) {
-            this.node.x += this.playerSpeed * this.moveDir * dt;
+            if(this.moveDir == -1 && this.node.x < -450)
+                this.node.x = -450;
+            else 
+                this.node.x += this.playerSpeed * this.moveDir * dt;
         }
-        if (this.node.position.y < -350) {
-            const gameMgr = this.node.getComponent(GameMgr);
-            if (gameMgr) {
-                gameMgr.updateLife(-1);
-            }
+        // the range of player
+        if (this.node.position.y < -350 && !this.isDead) {
+            this.die();
         }
 
         const baseScale = 3;
@@ -78,6 +83,9 @@ export class Player extends cc.Component {
 
     onKeyDown(event) {
         switch (event.keyCode) {
+            case cc.macro.KEY.d:
+                console.log("position log: ", this.node.position);
+                break;
             case cc.macro.KEY.left:
                 this.leftDown = true;
                 this.playerMove(-1);
@@ -146,16 +154,33 @@ export class Player extends cc.Component {
     }
 
     respawn() {
-        console.log("RESPAWN - start");
-        this.node.position = cc.v3(120, -260, 0);
-        console.log("RESPAWN - position set", this.node.position);
+        this.isDead = false;
+        this.getComponent("Player").position = cc.v3(120, -260, 0);
         const rb = this.getComponent(cc.RigidBody);
         rb.linearVelocity = cc.v2(0, 0); // Reset velocity
-        console.log("RESPAWN - velocity reset");
+    }
+
+    die() {
+        const gameMgr = this.node.getComponent(GameMgr);
+        if (gameMgr) {
+            gameMgr.updateLife(-1);
+        }
+        this.getComponent(cc.RigidBody).linearVelocity = cc.v2(0, 1000);
+        this.isDead = true; 
+        this.anim.play("fall_die");
+        this.respawn();
+    }   
+
+    
+    onPreSolve(contact, selfCollider, otherCollider) {
+        console.log("IN PRESOLVE");
+        if (this.isDead || ((contact.getWorldManifold().normal.y > 0) && otherCollider.tag === 1)) { // Only allow collision from the top
+            contact.disabled = true;
+        } 
     }
 
     onBeginContact(contact, selfCollider, otherCollider) {
-        if (otherCollider.tag === 1) {
+        if (otherCollider.tag === 1 && !this.isDead) {
             this.isOnGround = true;
             this.jumpAnimTriggered = false;
         }
@@ -166,5 +191,5 @@ export class Player extends cc.Component {
             console.log("Player End Contact");
             this.isOnGround = false;
         }
-    }
+    }  
 }

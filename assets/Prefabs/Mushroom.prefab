@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "QuestionBox",
+    "_name": "Mushroom",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -27,16 +27,10 @@
       },
       {
         "__id__": 4
-      },
-      {
-        "__id__": 5
-      },
-      {
-        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 7
+      "__id__": 5
     },
     "_opacity": 255,
     "_color": {
@@ -60,8 +54,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        1719.941,
-        14.129,
+        -24.083,
+        181.913,
         0,
         0,
         0,
@@ -69,7 +63,7 @@
         1,
         2.2,
         2.2,
-        1
+        2.2
       ]
     },
     "_eulerAngles": {
@@ -101,7 +95,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "79d59ad4-d0bc-44b7-a9b8-b1a89111a2c6"
+      "__uuid__": "c7c5db3a-16d9-45a0-9312-ccec017b933e"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -115,32 +109,7 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": {
-      "__uuid__": "0edc8df7-2238-45dd-9409-9b34b03f0324"
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "45fbfPvkLVHxK3YwYBYiWAC",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "coinPrefab": {
-      "__uuid__": "1f7cd547-b4cf-4eb9-8c4d-136d26909c7c"
-    },
-    "mushroomPrefab": {
-      "__uuid__": "16412c02-779f-4668-86d9-a25ac4a7a621"
-    },
-    "coinSound": {
-      "__uuid__": "3d11d720-40ab-4d39-84b4-2c447fe7f4f8"
-    },
-    "mushroomSound": {
-      "__uuid__": "9f1d7f8f-7d13-486c-8323-1cea90287db0"
-    },
-    "normalBoxSpriteFrame": {
-      "__uuid__": "53a0835d-badd-48ee-94ca-f73b1c4f7f6f"
+      "__uuid__": "7124758b-2e4c-4f24-8990-4c2f89671483"
     },
     "_id": ""
   },
@@ -152,7 +121,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 0,
+    "_type": 2,
     "_allowSleep": true,
     "_gravityScale": 1,
     "_linearDamping": 0,
@@ -164,7 +133,7 @@
     },
     "_angularVelocity": 0,
     "_fixedRotation": false,
-    "enabledContactListener": true,
+    "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""
@@ -177,9 +146,9 @@
       "__id__": 1
     },
     "_enabled": true,
-    "tag": 1,
-    "_density": 1,
-    "_sensor": false,
+    "tag": 3,
+    "_density": 0.5,
+    "_sensor": true,
     "_friction": 0.2,
     "_restitution": 0,
     "body": null,
@@ -190,29 +159,9 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 16,
-      "height": 16
+      "width": 14,
+      "height": 15
     },
-    "_id": ""
-  },
-  {
-    "__type__": "70caayeU/9KoqWMIVnQncIh",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "upperBound": null,
-    "lowerBound": null,
-    "startIcon": null,
-    "pauseIcon": null,
-    "scoreNode": null,
-    "highestScoreNode": null,
-    "lifeCnt": null,
-    "playerNode": null,
-    "bgm": null,
-    "lifeDecreaseSound": null,
     "_id": ""
   },
   {
